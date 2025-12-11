@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RedLink — Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+  <div class="site" id="siteRoot" aria-hidden="true">
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="left">
+          <div id="logo" class="brand" role="button" tabindex="0">RedLink</div>
+        </div>
+
+        <nav class="main-nav" role="navigation" aria-label="Main navigation">
+          <button class="nav-pill active" data-route="#home">Home</button>
+          <button class="nav-pill" data-route="#dashboard">Dashboard</button>
+          <button class="nav-pill" data-route="#find">Find Donor</button>
+          <button class="nav-pill" data-route="#register">Register as Donor</button>
+          <button class="nav-pill" data-route="#map">Blood Banks</button>
+          <a class="nav-pill pill-donate" href="donate.html">Donate</a>
+        </nav>
+
+        <div class="right">
+          <button id="profileBtn" class="profile-btn">Sign In</button>
+          <button id="logoutHeader" class="profile-btn" style="display:none;margin-left:8px;background:transparent;border:1px solid rgba(255,255,255,0.14);color:#fff;border-radius:8px;padding:6px 10px">Logout</button>
+        </div>
+      </div>
+
+      <div class="quote-row">
+        <div id="quoteBox" class="quote">Donate blood, save a life.</div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- HOME HERO -->
+      <section id="page-home" class="page active">
+        <div class="hero card">
+          <div class="hero-left">
+            <h1>Welcome to <span class="accent">RedLink</span></h1>
+            <p class="lead">Your trusted blood donation management platform. Connect with donors, request blood, and save lives.</p>
+            <div class="hero-actions">
+              <button id="heroRequest" class="btn primary">Request Blood</button>
+              <a href="donate.html" class="btn outline">Donate to Needy</a>
+            </div>
+
+            <div class="home-info">
+              <div class="home-left card small">
+                <h3>About RedLink</h3>
+                <p class="muted">We have a dedicated team that coordinates with donors and hospitals to ensure timely blood availability and transport. Use the portal to find donors, request blood, or register to donate.</p>
+                <ul>
+                  <li>Find donors by blood group & city</li>
+                  <li>Register as a donor (90 days rule shown)</li>
+                  <li>Requests are processed by our coordination team</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="stats">
+              <div class="stat"><div class="stat-num" id="statDonors">-</div><div class="stat-label">Active Donors</div></div>
+              <div class="stat"><div class="stat-num" id="statTypes">8</div><div class="stat-label">Blood Types</div></div>
+              <div class="stat"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending Requests</div></div>
+              <div class="stat"><div class="stat-num" id="statBanks">5</div><div class="stat-label">Blood Banks</div></div>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <div class="inventory-preview card small">
+              <h3>Blood Inventory</h3>
+              <div id="inventoryPreview" class="inventory-grid"></div>
+            </div>
+
+            <div class="map-mini card small" style="width:100%;padding:6px;">
+              <h4 style="margin:6px 0;">Map Preview</h4>
+              <div id="miniMap" style="height:140px;border-radius:8px;overflow:hidden"></div>
+            </div>
+
+            <img src="assets/doodle-1.svg" class="hero-doodle" alt="">
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page" style="display:none">
+        <div class="card">
+          <h2 class="card-title">Dashboard — Inventory & Overview</h2>
+          <div id="stockGrid" class="stock-grid"></div>
+
+          <div style="margin-top:18px">
+            <h3>Quick Actions</h3>
+            <div class="row" style="gap:8px">
+              <button id="reqQuick" class="btn primary">Request Blood</button>
+              <a href="donate.html" class="btn outline">Donate</a>
+              <button id="openFind" class="btn">Find Donor</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FIND -->
+      <section id="page-find" class="page" style="display:none">
+        <div class="card">
+          <h2 class="card-title">Find Blood Donor</h2>
+          <form id="findForm" class="find-form" onsubmit="return false;">
+            <div class="row wrap">
+              <div class="field"><label>Blood Group</label><select id="findBlood"><option value="">Any</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+              <div class="field"><label>City / Locality</label><input id="findCity" placeholder="Hauz Khas, Delhi"></div>
+              <div class="field"><label>Name (optional)</label><input id="findName" placeholder="e.g. Amol"></div>
+              <div class="field small">
+                <label class="inline"><input id="findAvailable" type="checkbox"> Available now</label>
+                <label class="inline"><input id="showHidden" type="checkbox"> Show Hidden</label>
+              </div>
+              <div class="field btn-field"><button id="doFind" class="btn primary">Search</button></div>
+            </div>
+          </form>
+
+          <div id="findResults" class="results"></div>
+        </div>
+      </section>
+
+      <!-- REGISTER -->
+      <section id="page-register" class="page" style="display:none">
+        <div class="card narrow">
+          <h2 class="card-title">Register as Donor</h2>
+          <form id="donorForm" onsubmit="return false;">
+            <label>Name <input id="donorName" required></label>
+            <label>Blood Group <select id="donorBlood" required><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></label>
+            <label>Phone <input id="donorPhone"></label>
+            <label>City <input id="donorCity"></label>
+            <label>Last donation (optional) <input id="donorLast" type="date"></label>
+            <p class="muted small">You must wait at least <strong>90 days</strong> after last donation to donate again.</p>
+            <div class="row" style="margin-top:8px"><button id="donorSubmit" class="btn primary">Register</button><button id="donorBack" class="btn outline">Back</button></div>
+            <div id="donorMsg" class="muted" style="margin-top:8px"></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- MAP -->
+      <section id="page-map" class="page" style="display:none">
+        <div class="card">
+          <h2 class="card-title">Nearby Blood Banks</h2>
+          <div id="mapContainer" style="height:420px;border-radius:8px;overflow:hidden"></div>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="page-profile" class="page" style="display:none">
+        <div class="card narrow">
+          <h2 class="card-title">Profile</h2>
+          <div id="profileBox"></div>
+          <div class="row" style="margin-top:12px"><button id="profileLogout" class="btn">Logout</button><a href="profile.html" class="btn outline">Open full profile</a></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <img src="assets/doodle-2.svg" class="footer-doodle" alt="">
+        <div class="footer-text">RedLink • Connecting donors and recipients</div>
+        <div></div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- LOGIN / REGISTER MODAL (blocks UI until auth) -->
+  <div id="authModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card card auth-card">
+      <div class="auth-left">
+        <h2>Sign in to RedLink</h2>
+        <form id="loginForm" onsubmit="return false;">
+          <label>Username / Email <input id="loginUser" required></label>
+          <label>Password <input id="loginPass" type="password" required></label>
+          <div class="row" style="margin-top:8px"><button id="loginBtn" class="btn primary">Sign In</button><button id="showRegister" class="btn outline">Create Account</button></div>
+          <div id="loginMsg" class="muted" style="margin-top:8px"></div>
+        </form>
+      </div>
+
+      <div class="auth-right" style="border-left:1px solid #f1f3f5;padding-left:14px">
+        <h3>New here?</h3>
+        <p class="muted">Create an account to register as donor, request blood and keep track of your requests.</p>
+        <form id="registerForm" onsubmit="return false;" style="display:none">
+          <label>Name <input id="regName" required></label>
+          <label>Email (unique) <input id="regEmail" required></label>
+          <label>Password <input id="regPass" type="password" required></label>
+          <div class="row" style="margin-top:8px"><button id="regBtn" class="btn primary">Create Account</button><button id="showLogin" class="btn outline">Back to Sign In</button></div>
+          <div id="regMsg" class="muted" style="margin-top:8px"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Modal -->
+  <div id="requestModal" class="modal" style="display:none" aria-hidden="true">
+    <div class="modal-card card">
+      <h3>Request Blood</h3>
+      <form id="requestForm" onsubmit="return false;">
+        <label>Blood Group <select id="reqBlood" required><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></label>
+        <label>City <input id="reqCity" required></label>
+        <label>Patient name <input id="reqPatient"></label>
+        <div class="row" style="margin-top:10px"><button id="createRequest" class="btn primary">Create Request</button><button id="closeRequest" class="btn outline">Cancel</button></div>
+        <div id="reqMsg" class="muted" style="margin-top:8px"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

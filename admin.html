@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>RedLink — Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-wrap{ max-width:1100px;margin:20px auto;padding:12px }
+    .admin-grid{ display:grid; grid-template-columns:1fr 420px; gap:12px }
+    @media(max-width:900px){ .admin-grid{ grid-template-columns:1fr } }
+    .muted{ color:#6b7280 }
+    .small-scroll{ max-height:380px; overflow:auto; padding-right:6px }
+    .admin-login{ max-width:460px; margin:0 auto 12px auto }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="left"><div class="brand">RedLink — Admin</div></div>
+      <nav class="main-nav"><a class="nav-pill" href="index.html">User portal</a></nav>
+      <div class="right"></div>
+    </div>
+    <div class="quote-row"><div id="adminQuote" class="quote"></div></div>
+  </header>
+
+  <main class="admin-wrap">
+    <div id="loginCard" class="card admin-login">
+      <h2>Admin Login</h2>
+      <form id="adminLogin" onsubmit="return false;">
+        <label>Username <input id="adminUser" required></label>
+        <label>Password <input id="adminPass" type="password" required></label>
+        <div class="row" style="margin-top:8px"><button id="adminLoginBtn" class="btn primary">Login</button><div id="adminMsg" class="muted" style="margin-left:8px"></div></div>
+      </form>
+    </div>
+
+    <div id="adminPanel" style="display:none">
+      <div class="admin-grid">
+        <div>
+          <div class="card">
+            <h3>Inventory</h3>
+            <div id="adminInventory" class="small-scroll"></div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Pending Requests</h3>
+            <div id="adminRequests" class="small-scroll"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <h3>Ambulance Requests</h3>
+            <div id="adminAmbulance" class="small-scroll"></div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Audit Log</h3>
+            <div id="adminAudit" class="small-scroll muted"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    (function(){
+      const quotes = window.RedLinkConfig.QUOTES || []; let i=0; function rot(){ document.getElementById('adminQuote').innerText = quotes[i%quotes.length]||''; i++; } rot(); setInterval(rot,60000);
+      document.getElementById('adminLoginBtn').addEventListener('click', function(){
+        const u=document.getElementById('adminUser').value.trim(), p=document.getElementById('adminPass').value.trim();
+        if(u==='itsamol' && p==='amolsgt'){
+          document.getElementById('loginCard').style.display='none';
+          document.getElementById('adminPanel').style.display='block';
+          loadAdmin();
+        } else document.getElementById('adminMsg').innerText='Invalid credentials';
+      });
+
+      function loadAdmin(){
+        const invArea = document.getElementById('adminInventory'); invArea.innerHTML='';
+        const inv = AdminModule.getInventory();
+        Object.keys(inv).forEach(k=>{
+          const row = document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.marginBottom='8px';
+          row.innerHTML = `<div><strong>${k}</strong><div class="muted">Units: ${inv[k]}</div></div>
+            <div style="display:flex;gap:8px;align-items:center"><input id="delta_${k}" placeholder="+1/-1" style="width:80px;padding:6px;border-radius:6px"/><button class="btn" onclick="adminUpdate('${k}')">Update</button></div>`;
+          invArea.appendChild(row);
+        });
+
+        const reqArea = document.getElementById('adminRequests'); reqArea.innerHTML='';
+        const pend = AdminModule.getPendingRequests();
+        if(!pend.length) reqArea.innerHTML = '<div class="muted">No pending requests</div>';
+        pend.forEach(r=>{
+          const el = document.createElement('div'); el.className='card'; el.style.marginBottom='8px';
+          el.innerHTML = `<div><strong>${r.blood}</strong> • ${r.city}<div class="muted">${r.patientName||''}</div></div>
+            <div style="margin-top:8px;display:flex;gap:8px"><button class="btn" onclick="adminApprove('${r.id}')">Approve</button><button class="btn outline" onclick="adminReject('${r.id}')">Reject</button></div>`;
+          reqArea.appendChild(el);
+        });
+
+        const amb = AdminModule.getAmbulance();
+        const ambArea = document.getElementById('adminAmbulance'); ambArea.innerHTML = amb.length ? '' : '<div class="muted">No ambulance requests</div>';
+        amb.forEach(a=>{
+          const e = document.createElement('div'); e.className='card'; e.style.marginBottom='8px';
+          e.innerHTML = `<div><strong>${a.address}</strong><div class="muted">${a.note||''}</div></div>`;
+          ambArea.appendChild(e);
+        });
+
+        const audit = (function(){ try{ return JSON.parse(localStorage.getItem(window.RedLinkConfig.APP_KEY)).audit||[] }catch(e){return[]} })();
+        const auditArea = document.getElementById('adminAudit'); auditArea.innerHTML = '';
+        if(!audit.length) auditArea.innerHTML = '<div class="muted">No audit entries</div>';
+        audit.slice().reverse().forEach(a=>{
+          const row = document.createElement('div'); row.style.marginBottom='6px';
+          row.innerText = `${a.when} • ${a.who} • ${a.group} • ${a.delta} • ${a.reason}`;
+          auditArea.appendChild(row);
+        });
+      }
+
+      window.adminUpdate = function(group){
+        const val = Number(document.getElementById('delta_'+group).value||0);
+        if(!val){ alert('Enter delta'); return; }
+        const reason = prompt('Reason') || 'manual';
+        AdminModule.updateInventory(group, val, 'admin', reason);
+        loadAdmin(); alert('Updated');
+      };
+      window.adminApprove = function(id){
+        const ok = AdminModule.setRequestStatus(id,'approved');
+        if(ok){ alert('Approved'); loadAdmin(); } else alert('Cannot approve — no stock');
+      };
+      window.adminReject = function(id){
+        const ok = AdminModule.setRequestStatus(id,'rejected');
+        if(ok){ alert('Rejected'); loadAdmin(); } else alert('Failed');
+      };
+    })();
+  </script>
+</body>
+</html>

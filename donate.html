@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Donate — RedLink</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="left"><div class="brand">RedLink</div></div>
+      <nav class="main-nav"><a class="nav-pill" href="index.html">Home</a></nav>
+      <div class="right"><a class="nav-pill" href="index.html">Back</a></div>
+    </div>
+    <div class="quote-row"><div id="donateQuote" class="quote"></div></div>
+  </header>
+
+  <main class="main-content">
+    <div class="card narrow" style="margin:18px auto">
+      <h2 class="card-title">Donate to RedLink Foundation</h2>
+      <p class="muted">Support our mission with financial contribution (dummy details below).</p>
+
+      <div style="margin-top:12px">
+        <div class="donate-row"><strong>Account Number</strong><div id="accNum" class="mono">9898989898</div><button id="copyAcc" class="btn">Copy</button></div>
+        <div class="donate-row"><strong>IFSC</strong><div id="ifsc" class="mono">AMOL0009898</div><button id="copyIfsc" class="btn">Copy</button></div>
+        <div style="margin-top:8px"><strong>Bank</strong><div>RedLink Foundation (dummy)</div></div>
+        <div id="donMsg" class="muted" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner"><img src="assets/doodle-1.svg" class="footer-doodle" alt=""><div class="footer-text">Thank you</div></div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script>
+    (function(){
+      const quotes = window.RedLinkConfig.QUOTES || []; let i=0; function rot(){ document.getElementById('donateQuote').innerText = quotes[i%quotes.length]||''; i++; } rot(); setInterval(rot,60000);
+      document.getElementById('copyAcc').addEventListener('click', ()=>{ navigator.clipboard.writeText(document.getElementById('accNum').innerText); document.getElementById('donMsg').innerText='Account copied'; });
+      document.getElementById('copyIfsc').addEventListener('click', ()=>{ navigator.clipboard.writeText(document.getElementById('ifsc').innerText); document.getElementById('donMsg').innerText='IFSC copied'; });
+    })();
+  </script>
+</body>
+</html>
