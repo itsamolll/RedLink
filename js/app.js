@@ -290,3 +290,36 @@
   window.RedLinkApp = { refresh: updateStats };
 
 })();
+
+// == MOBILE NAV / HEADER STABILITY HELPERS ==
+// Add this at the end of js/app.js inside the IIFE or globally if file ends in IIFE
+(function(){
+  try{
+    // ensure main nav shown (in case some CSS/JS hid it)
+    const nav = document.querySelector('.main-nav');
+    if(nav) nav.style.display = 'flex';
+
+    // When orientation changes or viewport resizes, force header/nav layout recalculation
+    const ensureHeader = () => {
+      const h = document.querySelector('.site-header');
+      if(h){
+        // small nudge to force reflow
+        h.style.transform = 'translateZ(0)';
+        setTimeout(()=> { h.style.transform = ''; }, 300);
+      }
+      if(window._redlinkMap){ // if map exists, invalidate size so it doesn't cover UI
+        try { window._redlinkMap.invalidateSize(); } catch(e) {}
+      }
+    };
+
+    window.addEventListener('orientationchange', () => setTimeout(ensureHeader, 350));
+    window.addEventListener('resize', () => setTimeout(ensureHeader, 200));
+
+    // If auth modal is covering header on mobile, make it slightly lower so header remains clickable
+    const authModal = document.getElementById('authModal');
+    if(authModal){
+      authModal.style.paddingTop = '70px'; // pushes modal content down on small screens
+      authModal.style.boxSizing = 'border-box';
+    }
+  }catch(e){ console.warn('Mobile nav helper error', e); }
+})();
