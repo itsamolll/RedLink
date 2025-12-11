@@ -291,35 +291,75 @@
 
 })();
 
-// == MOBILE NAV / HEADER STABILITY HELPERS ==
-// Add this at the end of js/app.js inside the IIFE or globally if file ends in IIFE
+// === MOBILE & NAV HELPERS (append to end of js/app.js) ===
 (function(){
   try{
-    // ensure main nav shown (in case some CSS/JS hid it)
+    // ensure nav visible (in case of accidental CSS hiding)
     const nav = document.querySelector('.main-nav');
     if(nav) nav.style.display = 'flex';
 
-    // When orientation changes or viewport resizes, force header/nav layout recalculation
-    const ensureHeader = () => {
-      const h = document.querySelector('.site-header');
-      if(h){
-        // small nudge to force reflow
-        h.style.transform = 'translateZ(0)';
-        setTimeout(()=> { h.style.transform = ''; }, 300);
-      }
-      if(window._redlinkMap){ // if map exists, invalidate size so it doesn't cover UI
-        try { window._redlinkMap.invalidateSize(); } catch(e) {}
-      }
-    };
+    // keep header above modal and ensure it's touch-friendly
+    const header = document.querySelector('.site-header');
+    if(header){
+      header.style.zIndex = 1200;
+      header.style.position = 'sticky';
+      header.style.top = '0';
+    }
 
-    window.addEventListener('orientationchange', () => setTimeout(ensureHeader, 350));
-    window.addEventListener('resize', () => setTimeout(ensureHeader, 200));
+    // map global reference: if initMap sets window._redlinkMap, use it; else try to find and set later
+    function safeInvalidate(){
+      try {
+        if(window._redlinkMap && typeof window._redlinkMap.invalidateSize === 'function'){
+          window._redlinkMap.invalidateSize();
+        }
+      } catch(e){ console.warn('invalidate failed', e); }
+    }
 
-    // If auth modal is covering header on mobile, make it slightly lower so header remains clickable
+    // on orientation change and resize, give maps a little time and invalidate size
+    window.addEventListener('orientationchange', function(){
+      setTimeout(safeInvalidate, 400);
+      // small header reflow
+      if(header){ header.style.transform = 'translateZ(0)'; setTimeout(()=> header.style.transform = '', 300); }
+    });
+
+    window.addEventListener('resize', function(){
+      setTimeout(safeInvalidate, 200);
+    });
+
+    // also attempt an initial invalidate on load and after 1s (handles maps initialized while hidden)
+    window.addEventListener('load', function(){
+      setTimeout(safeInvalidate, 300);
+      setTimeout(safeInvalidate, 1100);
+    });
+
+    // if auth modal exists, ensure it doesn't cover header entirely on mobile
     const authModal = document.getElementById('authModal');
     if(authModal){
-      authModal.style.paddingTop = '70px'; // pushes modal content down on small screens
+      authModal.style.paddingTop = '72px';
       authModal.style.boxSizing = 'border-box';
     }
-  }catch(e){ console.warn('Mobile nav helper error', e); }
+
+    // Make nav horizontally scrollable on touch devices (improved tap targets)
+    if(nav){
+      nav.style.overflowX = 'auto';
+      nav.style.webkitOverflowScrolling = 'touch';
+      nav.querySelectorAll('.nav-pill').forEach(p => {
+        p.style.touchAction = 'manipulation';
+        p.style.minWidth = '64px';
+      });
+    }
+
+    // small safeguard: if any page route hides nav accidentally, ensure show on small screens
+    function ensureNavShown(){
+      const nav = document.querySelector('.main-nav');
+      if(nav && getComputedStyle(nav).display === 'none'){
+        nav.style.display = 'flex';
+      }
+    }
+    setInterval(ensureNavShown, 1500);
+
+  } catch(e){
+    console.warn('mobile helpers error', e);
+  }
 })();
+
