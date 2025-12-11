@@ -107,3 +107,68 @@ input, select{ padding:10px 12px; border-radius:8px; border:1px solid #eef0f3; b
   .hero h1{ font-size:24px }
   .inventory-grid{ grid-template-columns:repeat(2,1fr) }
 }
+
+/* == MOBILE NAV FIXES - paste at END of css/style.css == */
+
+/* Ensure header always visible and nav not clipped */
+.site-header{
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1200; /* above modals? modals use 1000+, increase if needed */
+  background: rgba(255,255,255,0.98); /* solid-ish so nav readable on scroll */
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* Make nav horizontally scrollable on very small screens */
+.main-nav{
+  display: flex !important;
+  gap: 8px;
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 4px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+/* ensure pills are visible and tappable */
+.nav-pill{
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 999px;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+}
+
+/* Make sure header children don't wrap awkwardly */
+.header-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 12px;
+}
+
+/* If modal covers header accidentally, keep header above */
+.modal { z-index: 1100; } /* modal slightly above content */
+.site-header { z-index: 1200; } /* header above modal so nav remains clickable */
+
+/* Ensure mobile map / content not hidden under header */
+.main-content { padding-top: 8px; }
+
+/* Larger touch targets */
+button, .btn {
+  padding: 10px 14px;
+  min-height: 42px;
+  font-size: 15px;
+}
+
+/* Small-screen tweaks */
+@media (max-width: 480px) {
+  .brand { font-size: 18px; }
+  .nav-pill { font-size: 13px; padding: 8px 10px; }
+}
