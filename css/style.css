@@ -224,3 +224,20 @@ input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid
 
 /* small accessibility tweaks */
 button, .btn { -webkit-tap-highlight-color: rgba(0,0,0,0.05); touch-action: manipulation; }
+
+/* === small final tweaks: hamburger positioning & header order === */
+.header-inner{display:flex;align-items:center;gap:12px;position:relative;}
+.header-inner .brand{order:1}
+.header-inner .main-nav{order:2}
+.header-inner .right{order:4;display:flex;align-items:center;gap:8px}
+.hamburger{order:3;margin-left:8px;margin-right:4px;}
+
+/* ensure hamburger sits to the left of profile but right aligned inside header */
+@media(max-width:720px){
+  .header-inner{padding:8px 12px;}
+  .hamburger{display:flex;position:relative;right:auto;top:auto;}
+  .profile-btn{display:flex}
+}
+
+/* ensure authModal sits below header so header remains clickable */
+#authModal{padding-top:72px;box-sizing:border-box;}
