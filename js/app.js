@@ -382,3 +382,108 @@ window.addEventListener("load", () => {
     }
   } catch (e) { console.warn('hamburger menu error', e); }
 })();
+/* === FINAL SMALL FIXES: auth handlers, hamburger placement, request-cancel binding === */
+(function(){
+  try{
+    // 1) Ensure hamburger sits to left of profile (move if needed)
+    const ham = document.querySelector('.hamburger');
+    const headerInner = document.querySelector('.header-inner');
+    const right = headerInner ? headerInner.querySelector('.right') : null;
+    if(ham && right){
+      // insert ham before right (so it appears left of profile area)
+      right.parentNode.insertBefore(ham, right);
+    }
+
+    // 2) AUTH: wire up login & register forms if they exist
+    const loginForm = document.getElementById('loginForm');
+    if(loginForm){
+      loginForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const id = (document.getElementById('loginUser')||{}).value || '';
+        const pw = (document.getElementById('loginPass')||{}).value || '';
+        if(!id || !pw){ alert('Please enter credentials'); return; }
+        try{
+          const user = window.Auth && window.Auth.login ? window.Auth.login(id, pw) : null;
+          if(user){
+            // hide modal then reload to show auth state
+            const m = document.getElementById('authModal'); if(m) m.style.display='none';
+            setTimeout(()=> location.reload(), 250);
+          } else {
+            alert('Invalid credentials (use demo: itsamol / amolsgt or ellinaig / ellinaig)');
+          }
+        }catch(err){
+          console.warn('login error', err);
+          alert('Login failed. Check console.');
+        }
+      });
+    }
+
+    const registerForm = document.getElementById('registerForm');
+    if(registerForm){
+      registerForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const name = (document.getElementById('reg_fullname')||{}).value || '';
+        const email = (document.getElementById('reg_email')||{}).value || '';
+        const password = (document.getElementById('reg_password')||{}).value || '';
+        if(!name || !email || !password){ alert('Please fill all fields'); return; }
+        try{
+          // try Auth.register if available, else create simple user
+          if(window.Auth && typeof window.Auth.register === 'function'){
+            window.Auth.register({ name, email, password, role:'user' });
+          } else {
+            const store = STORE.load();
+            store.users = store.users || [];
+            store.users.push({ name, email, password, role:'user' });
+            STORE.save(store);
+          }
+          alert('Account created. You can now login.');
+          // auto-fill login fields if present
+          if(document.getElementById('loginUser')) document.getElementById('loginUser').value = email;
+          if(document.getElementById('loginPass')) document.getElementById('loginPass').value = password;
+          const m = document.getElementById('authModal'); if(m) m.style.display='none';
+          setTimeout(()=> location.reload(), 300);
+        }catch(err){
+          console.warn('register err', err);
+          alert('Register failed. See console.');
+        }
+      });
+    }
+
+    // 3) Ensure auth modal close buttons work (if any)
+    document.querySelectorAll('[data-action="close-auth"]').forEach(el => {
+      el.addEventListener('click', ()=> {
+        const m = document.getElementById('authModal'); if(m) m.style.display='none';
+      });
+    });
+
+    // 4) Ensure request modal cancel works (in case previous binding missed)
+    const reqCancel = document.querySelector("[data-action='cancel-request']");
+    if(reqCancel){
+      reqCancel.addEventListener('click', () => {
+        const modal = document.getElementById('requestModal'); if(modal) modal.style.display='none';
+      });
+    }
+
+    // 5) Make sure create-account button shows register pane inside the same modal (if UI has tabs)
+    const showRegisterBtn = document.querySelectorAll('[data-show="register"]');
+    showRegisterBtn.forEach(b => b.addEventListener('click', () => {
+      // try to open modal and focus register
+      const m = document.getElementById('authModal'); if(m) m.style.display='flex';
+      // if there's a tab, try switching:
+      const tabReg = document.querySelector('.auth-tab-register');
+      const tabLogin = document.querySelector('.auth-tab-login');
+      if(tabReg && tabLogin){
+        tabLogin.style.display = 'none';
+        tabReg.style.display = 'block';
+      }
+    }));
+
+    // 6) small safeguard: if Auth.login stores token differently, show helpful message
+    // (no-op, only logs)
+    console.log('Final small fixes applied: auth handlers + hamburger moved.');
+
+  }catch(e){
+    console.warn('final-fixes error', e);
+  }
+})();
+
