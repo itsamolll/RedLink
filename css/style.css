@@ -1,17 +1,19 @@
-/* css/style.css — Responsive, mobile-first, premium light theme for RedLink */
+/* css/style.css — Final responsive, mobile-first, premium light theme for RedLink
+   Replace the entire css/style.css with this content.
+*/
 
 /* Reset & base */
 :root{
-  --accent: #e53935;
-  --bg: #ffffff;
-  --muted: #6b7280;
-  --card: #ffffff;
-  --shadow: 0 6px 18px rgba(16,24,40,0.06);
-  --radius: 12px;
-  --max-width: 1100px;
-  --gap: 14px;
-  --container-padding: 16px;
-  font-family: Inter, "Segoe UI", Roboto, sans-serif;
+  --accent:#e53935;
+  --bg:#ffffff;
+  --muted:#6b7280;
+  --card:#ffffff;
+  --shadow:0 6px 18px rgba(16,24,40,0.06);
+  --radius:12px;
+  --max-width:1100px;
+  --gap:14px;
+  --container-padding:16px;
+  font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Segoe UI Emoji", "Segoe UI Symbol";
   color-scheme: light;
 }
 
@@ -35,8 +37,9 @@ body{
   align-items:center;
 }
 
-.header-inner{max-width:var(--max-width);width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px var(--container-padding);gap:12px}
+/* header */
 .site-header{width:100%;position:sticky;top:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(6px);border-bottom:1px solid rgba(0,0,0,0.04);z-index:1200}
+.header-inner{max-width:var(--max-width);width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px var(--container-padding);gap:12px}
 .brand{font-weight:700;color:var(--accent);font-size:20px;cursor:pointer}
 .main-nav{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:6px 0;white-space:nowrap;-webkit-overflow-scrolling:touch}
 .nav-pill{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;color:#374151;flex:0 0 auto}
@@ -51,7 +54,7 @@ body{
 .quote-row{max-width:var(--max-width);width:100%;padding:6px var(--container-padding);display:flex;justify-content:center}
 .quote{background:linear-gradient(90deg, rgba(229,57,53,0.06), rgba(229,57,53,0.02));padding:8px 12px;border-radius:999px;color:var(--muted);font-weight:600;}
 
-/* main content area */
+/* main content */
 .main-content{width:100%;max-width:var(--max-width);padding:20px var(--container-padding);display:flex;flex-direction:column;gap:18px}
 
 /* cards */
@@ -89,7 +92,7 @@ body{
 .field{flex:1;min-width:160px}
 .field.small{flex:0 0 200px}
 .field label{display:block;font-weight:600;margin-bottom:6px}
-input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);font-size:14px}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);font-size:14px}
 .results{margin-top:12px;display:flex;flex-direction:column;gap:10px}
 .result-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);background:#fff}
 .result-left{display:flex;flex-direction:column;gap:6px}
@@ -125,7 +128,7 @@ input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0
   .brand{font-size:18px}
 }
 
-/* mobile specific: ensure nav & header very usable */
+/* mobile specific */
 @media(max-width:480px){
   .header-inner{padding:8px 12px}
   .brand{font-size:17px}
@@ -138,15 +141,7 @@ input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0
   #miniMap{height:160px}
 }
 
-/* utility */
-.muted{color:var(--muted)}
-.small{font-size:13px}
-.row{display:flex;gap:10px;align-items:center}
-.wrap{flex-wrap:wrap}
-.narrow{max-width:760px;margin:0 auto}
-
-/* == MOBILE HAMBURGER MENU (paste at end) == */
-/* hamburger button */
+/* hamburger & mobile menu (final) */
 .hamburger {
   display: none;
   width:44px;
@@ -177,12 +172,11 @@ input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0
 .hamburger .bar::before{ top:-6px }
 .hamburger .bar::after{ bottom:-6px }
 
-/* mobile menu overlay */
 .mobile-menu-overlay{
   display:none;
   position:fixed;
   inset:0;
-  z-index:1300; /* above header */
+  z-index:1300;
   background:rgba(12,12,14,0.45);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
@@ -200,8 +194,6 @@ input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0
   overflow:auto;
   transform:translateY(0);
 }
-
-/* mobile menu items (vertical) */
 .mobile-menu .menu-item{
   display:flex;
   align-items:center;
@@ -217,12 +209,18 @@ input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0
 }
 .mobile-menu .menu-item:hover{ background:rgba(229,57,53,0.04) }
 
-/* small screen: show hamburger, hide the regular nav overflow if needed */
+/* hide regular nav on small screens (use hamburger) */
 @media(max-width:720px){
   .hamburger{ display:flex }
-  /* keep original nav visible but allow horizontal scroll - optionally hide */
-  .main-nav{ display:none !important; } /* hide regular nav on small so mobile menu used */
+  .main-nav{ display:none !important; }
 }
 
-/* show overlay when active */
-.mobile-menu-overlay.open{ display:flex }
+/* utilities */
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.row{display:flex;gap:10px;align-items:center}
+.wrap{flex-wrap:wrap}
+.narrow{max-width:760px;margin:0 auto}
+
+/* small accessibility tweaks */
+button, .btn { -webkit-tap-highlight-color: rgba(0,0,0,0.05); touch-action: manipulation; }
